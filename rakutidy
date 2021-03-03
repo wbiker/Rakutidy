@@ -1,0 +1,64 @@
+#!/usr/bin/env raku
+
+my $level = 0;
+my $indention = " " x 4;
+my $parenthesis_found = False;
+my $curly_brackets_found = False;
+my $curly_brackets_close_found = False;
+my $square_bracket_open_found = False;
+my $square_bracket_close_found = False;
+my $comma_found = False;
+my $current_pos = 0;
+my $last_curly_open_pos = 0;
+my $last_square_open_pos = 0;
+
+while my $c = $*IN.getc {
+    ++$current_pos;
+    if $comma_found {
+        print "\n";
+        print $indention x $level;
+        $comma_found = False;
+        next if $c eq ' ';
+    }
+
+    if $parenthesis_found {
+        print "\n";
+        $parenthesis_found = False;
+    }
+
+    if $curly_brackets_found {
+        print "\n";
+        print $indention x ++$level;
+        $curly_brackets_found = False;
+        # does not print space
+        next if $c eq ' ';
+    }
+
+    if $curly_brackets_close_found {
+        # --$level;
+        $curly_brackets_close_found = False;
+    }
+
+    if $square_bracket_open_found {
+        print "\n";
+        print $indention x ++$level;
+        $square_bracket_open_found = False;
+    }
+
+    if $square_bracket_close_found {
+        #--$level;
+
+        $square_bracket_close_found = False;
+    }
+
+    given $c {
+        when ',' { $comma_found = True }
+        when '(' { $parenthesis_found = False }
+        when '{' { $curly_brackets_found = True; $last_curly_open_pos = $current_pos }
+        when '}' { $curly_brackets_close_found = True; print "\n"; print $indention x --$level }
+        when '[' { $square_bracket_open_found = True; $last_square_open_pos = $current_pos }
+        when ']' { $square_bracket_close_found = True; print "\n"; print $indention x --$level }
+    }
+
+    print $c;
+}
